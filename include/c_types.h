@@ -45,7 +45,12 @@ typedef double              real64;
 
 #define __le16      u16
 
-typedef unsigned int        size_t;
+//typedef unsigned int        size_t;
+#if !defined(__size_t)
+  #define __size_t 1
+  typedef unsigned int size_t;   /* others (e.g. <stdio.h>) also define */
+   /* the unsigned integral type of the result of the sizeof operator. */
+#endif
 
 #define __packed        __attribute__((packed))
 
