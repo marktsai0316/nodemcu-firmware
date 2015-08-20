@@ -2,10 +2,10 @@
 /* Linker Script for ld -N */
 MEMORY
 {
-  dport0_0_seg :                      	org = 0x3FF00000, len = 0x00010
-  dram0_0_seg :                       	org = 0x3FFE8000, len = 0x14000
-  iram1_0_seg :                       	org = 0x40100000, len = 0x08000
-  irom0_0_seg :                       	org = 0x40210000, len = 0x80000
+  dport0_0_seg :                        org = 0x3FF00000, len = 0x10
+  dram0_0_seg :                         org = 0x3FFE8000, len = 0x14000
+  iram1_0_seg :                         org = 0x40100000, len = 0x8000
+  irom0_0_seg :                         org = 0x40240000, len = 0x3C000
 }
 
 PHDRS
@@ -19,7 +19,7 @@ PHDRS
 
 
 /*  Default entry point:  */
-ENTRY(user_start_trampoline)
+ENTRY(call_user_start)
 EXTERN(_DebugExceptionVector)
 EXTERN(_DoubleExceptionVector)
 EXTERN(_KernelExceptionVector)
@@ -92,7 +92,10 @@ SECTIONS
   {
     _rodata_start = ABSOLUTE(.);
     *(.sdk.version)
+    *(.rodata)
+    *(.rodata.*)
     *(.gnu.linkonce.r.*)
+    *(.rodata1)
     __XT_EXCEPTION_TABLE__ = ABSOLUTE(.);
     *(.xt_except_table)
     *(.gcc_except_table)
@@ -179,7 +182,7 @@ SECTIONS
     *(.entry.text)
     *(.init.literal)
     *(.init)
-    *(.literal .text .iram0.text .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
+    *(.literal .text .literal.* .text.* .stub .gnu.warning .gnu.linkonce.literal.* .gnu.linkonce.t.*.literal .gnu.linkonce.t.*)
     *(.fini.literal)
     *(.fini)
     *(.gnu.version)
@@ -200,14 +203,7 @@ SECTIONS
   {
     _irom0_text_start = ABSOLUTE(.);
     *(.irom0.literal .irom.literal .irom.text.literal .irom0.text .irom.text)
-    *(.literal.* .text.*)
-
-    /* Trade some performance for lots of ram. At the time of writing the
-     * available Lua heap went from 18248 to 34704. */
-    *(.rodata*)
-
     _irom0_text_end = ABSOLUTE(.);
-    _flash_used_end = ABSOLUTE(.);
   } >irom0_0_seg :irom0_0_phdr
 }
 
